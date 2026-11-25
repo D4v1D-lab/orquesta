@@ -21,55 +21,53 @@ Orquesta is a **Windows-only** libGDX desktop template (package `com.mygdx.game`
 - Use the `Task` tool to delegate. Use `explore` for read-only discovery, asset inspection, and independent review; use `general` for a narrowly scoped implementation or a second opinion.
 - Parallelize only independent work. Safe in parallel: asset audits, code searches, research, and read-only reviews. Unsafe: two agents editing the same file, or one editing while another runs Gradle.
 - Every sub-agent starts with a fresh context. Write a self-contained brief with the objective, exact file paths, already-agreed decisions/constants, whether it may edit, and the exact files it may touch. Never assume it can see this conversation.
-- Include the project constraints in implementation briefs: Java 7 only, Windows/libGDX stack, asset keys use the folder prefix (`cars/`, `common/`, `plane/`, `boat/`, `train/`), no comments, and no Gradle while a game is running.
+- Include the project constraints in implementation briefs: Java 7 only, Windows/libGDX stack, asset keys use the folder prefix (`guitarras/`, `common/`, `pianos/`, `tambor/`, `maracas/`), no comments, and no Gradle while a game is running.
 - Assign one owner per file. A reliable split is: the main agent owns shared wiring (`OrquestaGame`, `VehicleSelectScreen`, `GiftScreen`); one sub-agent owns a single new screen/file; another sub-agent reviews it.
 - Do not ask sub-agents to commit, push, clean, reset, or run destructive git commands. Final integration, compile, and smoke tests remain with the main agent.
 - Require a short report: files touched, key decisions, assumptions, checks performed, and remaining risks. Review every edit with `git diff` and a compile before continuing.
 
 ## Flow / architecture
 
-- `OrquestaGame` (extends `Game`) owns the `AssetManager` and pre-creates all screens. Flow: `MainMenuScreen` → `VehicleSelectScreen` (Jugar) or `OptionsScreen` (Opciones); from vehicle select: car: `carGiftScreen` → `carStaticScreen`; plane: `planeGiftScreen` → `planeStaticScreen`; boat: `boatGiftScreen` → `boatStaticScreen`; train: `trainGiftScreen` → `trainStaticScreen`. The frozen scene returns to `VehicleSelectScreen` through the pause menu.
+- `OrquestaGame` (extends `Game`) owns the `AssetManager` and pre-creates all screens. Flow: `MainMenuScreen` → `VehicleSelectScreen` (Jugar) or `OptionsScreen` (Opciones); from vehicle select: car: `carGiftScreen` → `carStaticScreen`; plane: `planeGiftScreen` → `planeStaticScreen`; boat: `boatGiftScreen` → `boatStaticScreen`; train: `trainGiftScreen` → `trainStaticScreen`. After 30 seconds the static scene goes to `EndingScreen`, which returns to `VehicleSelectScreen` after the 10-second ending. The frozen scene also returns to `VehicleSelectScreen` through the pause menu.
 - `GiftScreen` shows `common/load_gift_sheet.png` for 5 seconds and plays the vehicle start sound; then it calls `game.setScreen(game.getStaticScreen(vehicle))`. This is the main hook for new gameplay.
-- `StaticVehicleScreen` builds a **frozen** scene per `VehicleType`: backdrop, road/lane art, and the vehicle sprite. It has no obstacles, movement, timer, audio, or metrics. `Esc` opens `PauseMenu`; `Resumir` closes it, `Menu` returns to `VehicleSelectScreen`.
+- `StaticVehicleScreen` builds a **frozen** scene per `VehicleType`: backdrop and a vehicle sprite centered on both axes. There is no road and no x-axis movement. `Enter` plays 1.5 s of the mode drift sound and advances one animated scale step (`1.00x → 1.67x → 2.33x → 3.00x`); three more presses step back down to `1.00x`. A 30-second run timer transitions to `EndingScreen`; the timer freezes while the pause menu is open. `Esc` opens `PauseMenu`; `Resumir` closes it, `Menu` returns to `VehicleSelectScreen`.
+- `EndingScreen` draws the mode ending over black with no mosaic and returns to `VehicleSelectScreen` after ~10 seconds. Car uses the generated 10×15 `guitarras/car_ending_sheet.png` and plays `guitarras/car_drive.mp3`; piano uses the generated 10×15 `pianos/avion_ending_sheet.png` and plays `pianos/avion_drive.mp3`; boat uses the generated 10×16 `tambor/bote_ending_sheet.png` and plays `tambor/bote_drive.mp3`; train uses the generated 10×15 `maracas/tren_ending_sheet.png` and plays `maracas/tren_drive.mp3`. Input is ignored during the ending.
 - `PauseMenu` is shared and intact: ESC during the frozen scene opens it, Resumir is selected by default, Menu returns to `VehicleSelectScreen`.
 - `OptionsScreen`: Métricas (top), Reiniciar (middle), Acerca (bottom) at `360×160`, Métricas selected by default. Métricas calls `GestorMetricas.abrirPaginaMetricas()`; Acerca opens `assets/artifacts/acerca.html`; both exit the app so the fullscreen game does not remain stuck behind the browser on a single monitor. Reiniciar uses two Enter presses and calls `GestorMetricas.reiniciarMetricas()`. ESC cancels a pending reset or returns to `MainMenuScreen`.
-- `VehicleSelectScreen` shows car, plane, boat, and train side by side, equal height (`130`), bottoms at `y = 45`, centers spaced `200` apart at `388`, `588`, `788`, `988`. Left/Up selects the previous vehicle, Right/Down the next (clamped); Enter starts the selected mode. ESC returns to `MainMenuScreen`.
+- `VehicleSelectScreen` shows car, plane, boat, and train side by side, equal height (`110`), bottoms at `y = 75`, centers spaced `200` apart at `388`, `588`, `788`, `988`. Left/Up selects the previous vehicle, Right/Down the next (clamped); Enter starts the selected mode. ESC returns to `MainMenuScreen`.
 - All screens use `StretchViewport(1376×768)`; the desktop window is fullscreen via LWJGL 2.
-- Input map: main menu arrows + Enter select Jugar/Opciones, ESC exits the app; Options arrows + Enter activate, ESC returns to MainMenu; vehicle select arrows + Enter, ESC returns to MainMenu; frozen scene `Esc` opens the pause menu. There is no mouse input.
+- Input map: main menu arrows + Enter select Jugar/Opciones, ESC exits the app; Options arrows + Enter activate, ESC returns to MainMenu; vehicle select arrows + Enter, ESC returns to MainMenu; frozen scene `Enter` plays 1.5 s drift and advances the scale step, `Esc` opens the pause menu. During the ending, input is ignored. There is no mouse input.
 
 ## Static scene constants (useful when rebuilding gameplay)
 
-`StaticVehicleScreen` uses `WORLD_WIDTH = 1376`, `WORLD_HEIGHT = 768`, `VEHICLE_Y = 45`, `START_LANE = 1`, `LANE_COUNT = 4`.
+`StaticVehicleScreen` uses `WORLD_WIDTH = 1376`, `WORLD_HEIGHT = 768`, centers each vehicle on both axes, and starts at scale `1f`. Scale levels are `1f, 1.6667f, 2.3333f, 3f` (`SCALE_STEPS = 3`). Each `Enter` plays 1.5 s of the mode drift sound and advances one level; drift volume starts at `0.75`, rises `0.25` when growing, falls `0.25` when shrinking, and is clamped to `0-1`; at `3f`, three presses step back down to `1f`. Scale animates at `SCALE_SPEED = 0.6667f` per second (1 s per step). Scale resets to `1f` in `show()`; drift stops on pause/leave. A `RUN_DURATION = 30f` timer transitions to the mode ending when it expires; the timer is frozen while paused. There is no road or lane system anymore.
 
-| Mode | Backdrop | Road | Vehicle crop | Vehicle width | Road border / asphalt (texture px) |
-|---|---|---|---|---|---|
-| CAR | `cars/mosaico_cesped.jpg` at `1376×1376` | `cars/road.jpg`, height-fit | `cars/carro.png` `(190,134,120,227)` | 90 | 10 / 398 |
-| PLANE | `plane/mosaico_cielo.jpg` at `1376×768` | `plane/road_cielo.jpg`, height-fit | `plane/avion.png` `(256,287,512,490)` | 100 | 10 / 348 |
-| BOAT | `boat/mosaico_mar.jpg` at `1376×768` | `boat/road_mar.jpg`, height-fit | `boat/bote.png` `(179,80,142,341)` | 80 | 20 / 454 |
-| TRAIN | `train/mosaico_tren.jpg` at `1376×2284.16` | `train/road_tierra.jpg`, fixed width `330` | `train/tren.png` `(209,47,82,391)` | 60 | 20 / 127 |
+| Mode | Backdrop | Vehicle crop | Vehicle width |
+|---|---|---|---|
+| CAR | `guitarras/mosaico_cesped.jpg` at `1376×768` | `guitarras/guitarra.png` `(119,119,262,262)` | 90 |
+| PLANE | `pianos/mosaico_cielo.jpg` at `1376×768` | `pianos/piano.png` `(104,144,292,257)` | 100 |
+| BOAT | `tambor/mosaico_mar.jpg` at `1376×768` | `tambor/drum.png` `(114,119,272,267)` | 80 |
+| TRAIN | `maracas/mosaico_tren.jpg` at `1376×768` | `maracas/maraca.png` `(139,154,222,192)` | 60 |
 
-Height-fit road math: `roadWidth = 768 * texW / texH`, centered; `textureScale = roadWidth / texW`; `asphaltLeft = roadLeft + border * textureScale`; `laneWidth = asphalt * textureScale / 4`; `laneCenter(lane) = asphaltLeft + laneWidth * (lane + 0.5f)`.
-
-Original gameplay screens used two scrolling copies of the backdrop (grass/sky/sea/train). The template uses one static copy because nothing moves. If you restore scrolling, re-check the tile heights: car grass `1376`, plane sky `768`, boat sea `768`, train mosaic `2284.16`, with scroll speed `90 px/s` in the original.
+All four backdrops are 1376×768 images drawn once at full screen. The template has no scrolling copies; if you restore scrolling, re-check the asset dimensions and scroll speed (`90 px/s` in the original).
 
 ## Assets
 
-- Runtime assets live in **`/assets`** (not `android/assets`). `desktop/build.gradle` sets `workingDir` to `../assets`. Layout: `assets/cars/` car-only, `assets/common/` shared/menu, `assets/plane/` plane-only, `assets/boat/` boat-only, `assets/train/` train-only. Always use the matching prefix in `AssetManager` keys.
+- Runtime assets live in **`/assets`** (not `android/assets`). `desktop/build.gradle` sets `workingDir` to `../assets`. Layout: `assets/guitarras/` car-mode assets, `assets/common/` shared/menu, `assets/pianos/` plane-mode assets, `assets/tambor/` boat-mode assets, `assets/maracas/` train-mode assets. Always use the matching prefix in `AssetManager` keys.
 - **Loaded by the template** (`OrquestaGame.create()`):
   - `common/`: `main_menu.jpg`, `jugar_hover.jpg`, `opciones.jpg`, `acerca.jpg`, `metricas.jpg`, `reinicio.jpg`, `journey_awaits.mp3`, `option_change.wav`, `racing_menu.ogg`, `load_gift_sheet.png`, `resumir.png`, `menu.png`.
-  - `cars/`: `carro.png`, `mosaico_cesped.jpg`, `road.jpg`, `car_start.mp3`.
-  - `plane/`: `avion.png`, `mosaico_cielo.jpg`, `road_cielo.jpg`, `avion_start.mp3`.
-  - `boat/`: `bote.png`, `mosaico_mar.jpg`, `road_mar.jpg`, `bote_start.mp3`.
-  - `train/`: `tren.png`, `mosaico_tren.jpg`, `road_tierra.jpg`, `tren_start.mp3`.
-- **Present on disk but NOT loaded** (gameplay leftovers; safe to replace or delete once you no longer need them): `cars/car_horn.mp3`, `cars/car_drive.wav`, `cars/car_drift.mp3`, `cars/car_ending_sheet.png`, `cars/cono.png`; `plane/cono_cielo.png`, `plane/avion_drive.mp3`, `plane/avion_drift.mp3`, `plane/avion_ending_sheet.png`; `boat/cono_mar.png`, `boat/bote_horn.mp3`, `boat/bote_drive.mp3`, `boat/bote_drift.mp3`, `boat/bote_ending_sheet.png`; `train/cono_tierra.png`, `train/tren_horn.mp3`, `train/tren_drive.mp3`, `train/tren_drive_loop.mp3`, `train/tren_drift.mp3`, `train/tren_ending_sheet.png`.
-- libGDX cannot load GIFs. The gift transition uses the pre-generated `common/load_gift_sheet.png` (75 frames, 8×10 grid, 480×270, 1/15 s). Mode ending sheets are 150 frames, 15×10 grid, 288×511 each, 1/15 s (~10 s) if you restore endings.
-- Cropped sprite regions: car `cars/carro.png` = `(190,134,120,227)`; cone `cars/cono.png` = `(192,169,116,162)`; plane `plane/avion.png` = `(256,287,512,490)`; sky obstacle `plane/cono_cielo.png` = `(159,194,182,112)`; boat `boat/bote.png` = `(179,80,142,341)`; sea obstacle `boat/cono_mar.png` = `(199,144,102,212)`; train `train/tren.png` = `(209,47,82,391)` including rails; ground obstacle `train/cono_tierra.png` = `(145,89,206,262)` including smoke.
-- `cars/road.jpg` is 418×768 (`ROAD_BORDER_TEX_PX = 10`, `ROAD_ASPHALT_TEX_PX = 398`); `plane/road_cielo.jpg` is 368×765 (`10`, `348`); `boat/road_mar.jpg` is 494×768 (`20`, `454`); `train/road_tierra.jpg` is 167×754 (`20`, `127`), drawn at fixed width `330`. Changing any road art requires re-checking those constants.
-- `plane/mosaico_cielo.jpg` and `boat/mosaico_mar.jpg` are 1376×768; `train/mosaico_tren.jpg` is 800×1328 drawn at `1376` wide and `2284.16` tall; `cars/mosaico_cesped.jpg` is the car grass tile. None of these mosaics is perfectly seamless top-to-bottom.
+  - `guitarras/`: `guitarra.png`, `mosaico_cesped.jpg`, `car_start.mp3`, `car_drift.mp3`, `car_ending_sheet.png`, `car_drive.mp3`.
+  - `pianos/`: `piano.png`, `mosaico_cielo.jpg`, `avion_start.mp3`, `avion_drift.mp3`, `avion_ending_sheet.png`, `avion_drive.mp3`.
+  - `tambor/`: `drum.png`, `mosaico_mar.jpg`, `bote_start.mp3`, `bote_drift.mp3`, `bote_ending_sheet.png`, `bote_drive.mp3`.
+  - `maracas/`: `maraca.png`, `mosaico_tren.jpg`, `tren_start.mp3`, `tren_drift.mp3`, `tren_ending_sheet.png`, `tren_drive.mp3`.
+- **Present on disk but NOT loaded** (stale object sprites, source GIF, and unused gameplay leftovers; safe to replace or delete once you no longer need them): `guitarras/carro.png`, `guitarras/car_horn.mp3`, `guitarras/cono.png`, `guitarras/carro_ending.gif`; `pianos/avion.png`, `pianos/cono_cielo.png`, `pianos/avion_ending.gif`; `tambor/bote.png`, `tambor/cono_mar.png`, `tambor/bote_horn.mp3`, `tambor/bote_ending.gif`; `maracas/tren.png`, `maracas/cono_tierra.png`, `maracas/tren_horn.mp3`, `maracas/tren_ending.gif`.
+- libGDX cannot load GIFs. The gift transition uses the pre-generated `common/load_gift_sheet.png` (75 frames, 8×10 grid, 480×270, 1/15 s). Mode ending sheets run at 1/15 s (~10 s): the car sheet is generated from `guitarras/carro_ending.gif` as a 10×15 grid of 480×270 frames; the piano sheet is generated from `pianos/avion_ending.gif` as a 10×15 grid of 480×270 frames; the boat sheet is generated from `tambor/bote_ending.gif` as a 10×16 grid of 480×272 frames (151 frames); the train sheet is generated from `maracas/tren_ending.gif` as a 10×15 grid of 480×270 frames.
+- Cropped sprite regions: car `guitarras/guitarra.png` = `(119,119,262,262)`; cone `guitarras/cono.png` = `(192,169,116,162)`; plane `pianos/piano.png` = `(104,144,292,257)`; sky obstacle `pianos/cono_cielo.png` = `(159,194,182,112)`; boat `tambor/drum.png` = `(114,119,272,267)`; sea obstacle `tambor/cono_mar.png` = `(199,144,102,212)`; train `maracas/maraca.png` = `(139,154,222,192)`; ground obstacle `maracas/cono_tierra.png` = `(145,89,206,262)` including smoke.
+- All four mosaics (`guitarras/mosaico_cesped.jpg`, `pianos/mosaico_cielo.jpg`, `tambor/mosaico_mar.jpg`, `maracas/mosaico_tren.jpg`) are 1376×768 and are drawn full-screen.
 - `common/resumir.png` and `common/menu.png` are the pause buttons, cropped `(39,155,422,190)` and `(79,155,342,191)` and rendered at `360×160` by `PauseMenu`.
 - `common/acerca.jpg`, `common/metricas.jpg`, and `common/reinicio.jpg` are the Options buttons, standardized to `360×160` by `OptionsScreen`. `assets/artifacts/acerca.html` is the styled about/dedication page opened by Acerca. Metrics reports are generated from `assets/artifacts/orquesta_metricas.html` and `orquesta_guia.html` into `Gdx.files.local("orquesta_metricas.html")` and `orquesta_guia.html`.
-- `GestorMetricas` persists metrics in `Orquesta_Metricas_Save`; `MetricasInputListener` counts ENTER presses/holds. Gameplay screens in the original also recorded resolved threats, dodges/hits, streaks, anticipation, and driving time per mode; that code was removed with the screens.
-- Audio currently used: `common/journey_awaits.mp3` (main menu, `0.5`), `common/racing_menu.ogg` (vehicle select and Options, `0.75`), `common/option_change.wav` (`0.75`), and the four vehicle start sounds in `GiftScreen`. Volumes are tuned manually by the user; do not “fix” them without being asked.
+- `GestorMetricas` persists metrics in `Orquesta_Metricas_Save`; `MetricasInputListener` measures ENTER hold time only while a run is active. Completed 30 s runs commit total games, gameplay ENTER presses, duration, and buffered hold samples; early exits are ignored. The report and guide are generated from `assets/artifacts/orquesta_metricas.html` and `orquesta_guia.html` into `Gdx.files.local("orquesta_metricas.html")` and `orquesta_guia.html`.
+- Audio currently used: `common/journey_awaits.mp3` (main menu, `0.5`), `common/racing_menu.ogg` (vehicle select and Options, `0.50`), `common/option_change.wav` (`0.75`), the four vehicle start sounds in `GiftScreen`, the four vehicle drift sounds in `StaticVehicleScreen` (dynamic volume starting at `0.75`, ±`0.25` per scale step, clamped `0-1`, cut off after `1.5 s`), and the ending sounds in `EndingScreen` at `0.5` (`car_drive.mp3`, `avion_drive.mp3`, `bote_drive.mp3`, and `tren_drive.mp3` once). Volumes are tuned manually by the user; do not “fix” them without being asked.
 - Box2D is a dependency but currently unused in code.
 
 ## How to add new gameplay
@@ -78,7 +76,7 @@ Original gameplay screens used two scrolling copies of the backdrop (grass/sky/s
 2. Add the screen field/getter/creation in `OrquestaGame`, and dispose it in `OrquestaGame.dispose()`.
 3. In `GiftScreen.render()`, replace `game.setScreen(game.getStaticScreen(vehicle))` with `game.setScreen(game.getYourScreen(vehicle))` (or route per `VehicleType`).
 4. Add every new resource with `manager.load(...)` in `OrquestaGame.create()` before `finishLoading()`.
-5. Restore metrics hooks with `GestorMetricas.registrarTiempoJuego(...)`, `registrarObstaculoEsquivado()`, `registrarChoque()`, and `registrarAnticipacion(...)`.
+5. Metrics: `StaticVehicleScreen` already records completed runs via `GestorMetricas.registrarJuegoCompletado(...)`; extend `GestorMetricas` only if you need more metrics.
 6. Keep the pause flow: on `Esc`, call `pauseMenu.show()`; on `ACTION_RESUME`, resume; on `ACTION_MENU`, `game.setScreen(game.getVehicleSelectScreen())`.
 
 ## Current state / next steps
@@ -86,5 +84,8 @@ Original gameplay screens used two scrolling copies of the backdrop (grass/sky/s
 - The template compiles and the full menu → vehicle select → gift → frozen scene → pause flow is wired.
 - Gameplay is intentionally absent. The four original mode screens (`GameScreen`, `AirplaneScreen`, `BoatScreen`, `TrainScreen`) were deleted.
 - Assets for the old gameplay remain on disk but are not loaded; they are free to be replaced.
-- Metrics remain functional but mode time/dodge counters stay at zero until gameplay is re-added.
+- The road art and lane helpers were removed; instruments are centered on both axes over the full-screen backdrop.
+- `Enter` plays 1.5 s of the mode drift sound and animates the instrument through `1.00x → 1.67x → 2.33x → 3.00x`, then back down after three more presses; drift volume rises/falls `0.25` with the scale direction; there is no x-axis movement.
+- Each run lasts 30 s, then the mode ending plays for 10 s over black (piano full-screen with `avion_drive`) before returning to vehicle selection.
+- Metrics track completed-run ENTER presses (per game and total), average ENTER hold time measured only during those runs, and average completed-run duration; Reiniciar zeroes them all.
 - The repository was re-initialized fresh (no upstream `punchit/punch-it` remote).

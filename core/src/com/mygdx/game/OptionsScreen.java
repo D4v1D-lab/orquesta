@@ -162,7 +162,7 @@ public class OptionsScreen extends BaseScreen {
         statusLabel.setText("");
         statusLabel.setVisible(false);
         music.setLooping(true);
-        music.setVolume(0.75f);
+        music.setVolume(0.50f);
         if (!music.isPlaying()) {
             music.play();
         }

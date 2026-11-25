@@ -55,6 +55,12 @@
     .tarjeta h2 { color: #f5b041; font-size: 18px; margin-bottom: 8px; }
     .tarjeta p { font-size: 14px; color: #d6d9ec; margin-bottom: 8px; }
     .ayuda { color: #2ecc71; font-size: 14px; }
+    .nota-final {
+      margin-top: 22px;
+      color: #9aa0c7;
+      font-size: 13px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -66,34 +72,30 @@
     </header>
 
     <div class="tarjeta">
-      <h2>1. Evasión de Obstáculos (%)</h2>
-      <p><b>Qué es:</b> El porcentaje de amenazas que el jugador logró esquivar frente al total que pasaron por su carril.</p>
-      <p class="ayuda"><b>Cómo ayuda:</b> Muestra el dominio general del juego. Si sube con los días, indica una mejora clara en la coordinación ojo-mano.</p>
+      <h2>1. Pulsaciones por juego</h2>
+      <p><b>Qué es:</b> la media de pulsaciones de ENTER durante cada partida completada de 30 segundos. Las salidas anticipadas no se cuentan.</p>
+      <p class="ayuda"><b>Cómo ayuda:</b> muestra la frecuencia de interacción y la constancia dentro de una partida.</p>
     </div>
 
     <div class="tarjeta">
-      <h2>2. Racha Máxima</h2>
-      <p><b>Qué es:</b> El récord de obstáculos esquivados de forma consecutiva sin cometer un solo error.</p>
-      <p class="ayuda"><b>Cómo ayuda:</b> Mide la atención sostenida y sirve como meta de superación personal muy motivadora.</p>
+      <h2>2. Pulsaciones totales</h2>
+      <p><b>Qué es:</b> el total de pulsaciones de ENTER registradas en las partidas completadas.</p>
+      <p class="ayuda"><b>Cómo ayuda:</b> refleja el esfuerzo acumulado y el uso general del pulsador.</p>
     </div>
 
     <div class="tarjeta">
-      <h2>3. Anticipación Media (ms)</h2>
-      <p><b>Qué es:</b> El tiempo promedio (en milisegundos) que tarda el jugador en presionar el botón desde que ve acercarse un obstáculo.</p>
-      <p class="ayuda"><b>Cómo ayuda:</b> Permite evaluar la velocidad de procesamiento visual y saber si la velocidad del juego es cómoda o demasiado rápida.</p>
+      <h2>3. Retención de botón</h2>
+      <p><b>Qué es:</b> el tiempo medio que se mantiene pulsada la tecla ENTER antes de soltarla. Se mide solo durante la partida de 30 s; las salidas anticipadas no se cuentan.</p>
+      <p class="ayuda"><b>Cómo ayuda:</b> en accesibilidad, permite detectar fatiga motora o ajustar la sensibilidad del pulsador.</p>
     </div>
 
     <div class="tarjeta">
-      <h2>4. Retención del Botón (ms)</h2>
-      <p><b>Qué es:</b> Cuánto tiempo mantiene presionado el botón o tecla en cada pulsación antes de soltarlo.</p>
-      <p class="ayuda"><b>Cómo ayuda:</b> Clave en accesibilidad: si este tiempo aumenta mucho al final de la sesión, indica fatiga motora o necesidad de ajustar la sensibilidad del pulsador.</p>
+      <h2>4. Duración media</h2>
+      <p><b>Qué es:</b> la duración media de las partidas completadas. Las salidas anticipadas no se cuentan.</p>
+      <p class="ayuda"><b>Cómo ayuda:</b> indica cuánto tiempo se mantiene la atención en cada partida.</p>
     </div>
 
-    <div class="tarjeta">
-      <h2>5. Pulsaciones Totales y Tiempo por Vehículo</h2>
-      <p><b>Qué es:</b> La cantidad total de veces que se activó el pulsador y los minutos jugados en cada escenario.</p>
-      <p class="ayuda"><b>Cómo ayuda:</b> Permite controlar el esfuerzo físico acumulado en la sesión y descubrir qué estímulo visual (auto, avión, barco o tren) mantiene mayor interés.</p>
-    </div>
+    <p class="nota-final">Puedes poner todas las métricas a cero desde Opciones → Reiniciar.</p>
   </div>
 </body>
 </html>

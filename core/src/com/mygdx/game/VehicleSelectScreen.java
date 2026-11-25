@@ -17,8 +17,8 @@ public class VehicleSelectScreen extends BaseScreen {
 
     private static final float WORLD_WIDTH = 1376f;
     private static final float WORLD_HEIGHT = 768f;
-    private static final float ICON_HEIGHT = 130f;
-    private static final float ICON_Y = 45f;
+    private static final float ICON_HEIGHT = 110f;
+    private static final float ICON_Y = 75f;
     private static final float ICON_CENTER_SPACING = 200f;
     private static final float SELECTED_SCALE = 1.05f;
     private static final float DIMMED_ALPHA = 0.55f;
@@ -46,20 +46,20 @@ public class VehicleSelectScreen extends BaseScreen {
         background.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
         stage.addActor(background);
 
-        Texture carTexture = game.getManager().get("cars/carro.png", Texture.class);
-        TextureRegion carRegion = new TextureRegion(carTexture, 190, 134, 120, 227);
+        Texture carTexture = game.getManager().get("guitarras/guitarra.png", Texture.class);
+        TextureRegion carRegion = new TextureRegion(carTexture, 119, 119, 262, 262);
         car = createIcon(carRegion, centerX(CAR_INDEX));
 
-        Texture planeTexture = game.getManager().get("plane/avion.png", Texture.class);
-        TextureRegion planeRegion = new TextureRegion(planeTexture, 256, 287, 512, 490);
+        Texture planeTexture = game.getManager().get("pianos/piano.png", Texture.class);
+        TextureRegion planeRegion = new TextureRegion(planeTexture, 104, 144, 292, 257);
         plane = createIcon(planeRegion, centerX(PLANE_INDEX));
 
-        Texture boatTexture = game.getManager().get("boat/bote.png", Texture.class);
-        TextureRegion boatRegion = new TextureRegion(boatTexture, 179, 80, 142, 341);
+        Texture boatTexture = game.getManager().get("tambor/drum.png", Texture.class);
+        TextureRegion boatRegion = new TextureRegion(boatTexture, 114, 119, 272, 267);
         boat = createIcon(boatRegion, centerX(BOAT_INDEX));
 
-        Texture trainTexture = game.getManager().get("train/tren.png", Texture.class);
-        TextureRegion trainRegion = new TextureRegion(trainTexture, 209, 47, 82, 391);
+        Texture trainTexture = game.getManager().get("maracas/maraca.png", Texture.class);
+        TextureRegion trainRegion = new TextureRegion(trainTexture, 139, 154, 222, 192);
         train = createIcon(trainRegion, centerX(TRAIN_INDEX));
 
         stage.addActor(car);
@@ -117,7 +117,7 @@ public class VehicleSelectScreen extends BaseScreen {
     @Override
     public void show() {
         music.setLooping(true);
-        music.setVolume(0.75f);
+        music.setVolume(0.50f);
         if (!music.isPlaying()) {
             music.play();
         }

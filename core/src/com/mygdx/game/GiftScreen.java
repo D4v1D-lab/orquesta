@@ -35,10 +35,10 @@ public class GiftScreen extends BaseScreen {
         super(game);
         this.vehicle = vehicle;
         stage = new Stage(new StretchViewport(WORLD_WIDTH, WORLD_HEIGHT));
-        carStart = game.getManager().get("cars/car_start.mp3", Sound.class);
-        avionStart = game.getManager().get("plane/avion_start.mp3", Sound.class);
-        boteStart = game.getManager().get("boat/bote_start.mp3", Sound.class);
-        trenStart = game.getManager().get("train/tren_start.mp3", Sound.class);
+        carStart = game.getManager().get("guitarras/car_start.mp3", Sound.class);
+        avionStart = game.getManager().get("pianos/avion_start.mp3", Sound.class);
+        boteStart = game.getManager().get("tambor/bote_start.mp3", Sound.class);
+        trenStart = game.getManager().get("maracas/tren_start.mp3", Sound.class);
 
         Texture sheet = game.getManager().get("common/load_gift_sheet.png", Texture.class);
         int frameWidth = sheet.getWidth() / FRAME_COLS;

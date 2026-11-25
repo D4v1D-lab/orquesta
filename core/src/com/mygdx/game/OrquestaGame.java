@@ -21,6 +21,10 @@ public class OrquestaGame extends Game {
     private StaticVehicleScreen planeStaticScreen;
     private StaticVehicleScreen boatStaticScreen;
     private StaticVehicleScreen trainStaticScreen;
+    private EndingScreen carEndingScreen;
+    private EndingScreen planeEndingScreen;
+    private EndingScreen boatEndingScreen;
+    private EndingScreen trainEndingScreen;
 
     public AssetManager getManager() {
         return manager;
@@ -67,6 +71,19 @@ public class OrquestaGame extends Game {
         return trainStaticScreen;
     }
 
+    public EndingScreen getEndingScreen(VehicleType vehicle) {
+        if (vehicle == VehicleType.CAR) {
+            return carEndingScreen;
+        }
+        if (vehicle == VehicleType.PLANE) {
+            return planeEndingScreen;
+        }
+        if (vehicle == VehicleType.BOAT) {
+            return boatEndingScreen;
+        }
+        return trainEndingScreen;
+    }
+
     @Override
     public void create() {
         manager = new AssetManager();
@@ -82,22 +99,30 @@ public class OrquestaGame extends Game {
         manager.load("common/load_gift_sheet.png", Texture.class);
         manager.load("common/resumir.png", Texture.class);
         manager.load("common/menu.png", Texture.class);
-        manager.load("cars/carro.png", Texture.class);
-        manager.load("cars/mosaico_cesped.jpg", Texture.class);
-        manager.load("cars/road.jpg", Texture.class);
-        manager.load("cars/car_start.mp3", Sound.class);
-        manager.load("plane/avion.png", Texture.class);
-        manager.load("plane/mosaico_cielo.jpg", Texture.class);
-        manager.load("plane/road_cielo.jpg", Texture.class);
-        manager.load("plane/avion_start.mp3", Sound.class);
-        manager.load("boat/bote.png", Texture.class);
-        manager.load("boat/mosaico_mar.jpg", Texture.class);
-        manager.load("boat/road_mar.jpg", Texture.class);
-        manager.load("boat/bote_start.mp3", Sound.class);
-        manager.load("train/tren.png", Texture.class);
-        manager.load("train/mosaico_tren.jpg", Texture.class);
-        manager.load("train/road_tierra.jpg", Texture.class);
-        manager.load("train/tren_start.mp3", Sound.class);
+        manager.load("guitarras/guitarra.png", Texture.class);
+        manager.load("guitarras/mosaico_cesped.jpg", Texture.class);
+        manager.load("guitarras/car_start.mp3", Sound.class);
+        manager.load("guitarras/car_drift.mp3", Sound.class);
+        manager.load("pianos/piano.png", Texture.class);
+        manager.load("pianos/mosaico_cielo.jpg", Texture.class);
+        manager.load("pianos/avion_start.mp3", Sound.class);
+        manager.load("pianos/avion_drift.mp3", Sound.class);
+        manager.load("tambor/drum.png", Texture.class);
+        manager.load("tambor/mosaico_mar.jpg", Texture.class);
+        manager.load("tambor/bote_start.mp3", Sound.class);
+        manager.load("tambor/bote_drift.mp3", Sound.class);
+        manager.load("maracas/maraca.png", Texture.class);
+        manager.load("maracas/mosaico_tren.jpg", Texture.class);
+        manager.load("maracas/tren_start.mp3", Sound.class);
+        manager.load("maracas/tren_drift.mp3", Sound.class);
+        manager.load("guitarras/car_ending_sheet.png", Texture.class);
+        manager.load("pianos/avion_ending_sheet.png", Texture.class);
+        manager.load("tambor/bote_ending_sheet.png", Texture.class);
+        manager.load("maracas/tren_ending_sheet.png", Texture.class);
+        manager.load("guitarras/car_drive.mp3", Sound.class);
+        manager.load("pianos/avion_drive.mp3", Sound.class);
+        manager.load("tambor/bote_drive.mp3", Sound.class);
+        manager.load("maracas/tren_drive.mp3", Sound.class);
         manager.finishLoading();
 
         mainMenuScreen = new MainMenuScreen(this);
@@ -111,6 +136,10 @@ public class OrquestaGame extends Game {
         planeStaticScreen = new StaticVehicleScreen(this, VehicleType.PLANE);
         boatStaticScreen = new StaticVehicleScreen(this, VehicleType.BOAT);
         trainStaticScreen = new StaticVehicleScreen(this, VehicleType.TRAIN);
+        carEndingScreen = new EndingScreen(this, VehicleType.CAR);
+        planeEndingScreen = new EndingScreen(this, VehicleType.PLANE);
+        boatEndingScreen = new EndingScreen(this, VehicleType.BOAT);
+        trainEndingScreen = new EndingScreen(this, VehicleType.TRAIN);
 
         Gdx.input.setInputProcessor(new MetricasInputListener());
         setScreen(mainMenuScreen);
@@ -130,6 +159,10 @@ public class OrquestaGame extends Game {
         planeStaticScreen.dispose();
         boatStaticScreen.dispose();
         trainStaticScreen.dispose();
+        carEndingScreen.dispose();
+        planeEndingScreen.dispose();
+        boatEndingScreen.dispose();
+        trainEndingScreen.dispose();
         if (manager != null) {
             manager.dispose();
         }
