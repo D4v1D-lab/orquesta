@@ -61,11 +61,11 @@ public class EndingScreen extends BaseScreen {
             fullScreen = true;
             loop = false;
         } else if (vehicle == VehicleType.BOAT) {
-            frameCount = 151;
+            frameCount = 150;
             cols = 10;
-            rows = 16;
+            rows = 15;
             frameWidth = 480;
-            frameHeight = 272;
+            frameHeight = 270;
             sheetKey = "tambor/bote_ending_sheet.png";
             soundKey = "tambor/bote_drive.mp3";
             fullScreen = true;

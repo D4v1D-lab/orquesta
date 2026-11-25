@@ -6,6 +6,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -28,13 +29,20 @@ public class StaticVehicleScreen extends BaseScreen {
     private static final float DRIFT_VOLUME_MIN = 0f;
     private static final float DRIFT_VOLUME_MAX = 1f;
     private static final float RUN_DURATION = 30f;
+    private static final float SHAKE_AMPLITUDE = 6f;
+    private static final float SHAKE_HZ = 18f;
+    private static final float SHAKE_ANGULAR_SPEED = MathUtils.PI2 * SHAKE_HZ;
 
     private final Stage stage;
     private final PauseMenu pauseMenu;
     private final Sound drift;
     private final VehicleType vehicleType;
+    private final boolean percussive;
     private Image vehicle;
     private boolean paused;
+    private float vehicleBaseX;
+    private float vehicleBaseY;
+    private float shakeTime;
     private float driftTimer;
     private float driftVolume = DRIFT_VOLUME_BASE;
     private float runTimer;
@@ -47,6 +55,7 @@ public class StaticVehicleScreen extends BaseScreen {
     public StaticVehicleScreen(OrquestaGame game, VehicleType vehicle) {
         super(game);
         vehicleType = vehicle;
+        percussive = vehicle == VehicleType.BOAT || vehicle == VehicleType.TRAIN;
         stage = new Stage(new StretchViewport(WORLD_WIDTH, WORLD_HEIGHT));
         pauseMenu = new PauseMenu(game);
         drift = game.getManager().get(driftKey(vehicle), Sound.class);
@@ -108,8 +117,9 @@ public class StaticVehicleScreen extends BaseScreen {
         TextureRegion region = new TextureRegion(texture, cropX, cropY, cropWidth, cropHeight);
         vehicle = new Image(new TextureRegionDrawable(region));
         float vehicleHeight = vehicleWidth * region.getRegionHeight() / region.getRegionWidth();
-        vehicle.setBounds((WORLD_WIDTH - vehicleWidth) / 2f, (WORLD_HEIGHT - vehicleHeight) / 2f,
-                vehicleWidth, vehicleHeight);
+        vehicleBaseX = (WORLD_WIDTH - vehicleWidth) / 2f;
+        vehicleBaseY = (WORLD_HEIGHT - vehicleHeight) / 2f;
+        vehicle.setBounds(vehicleBaseX, vehicleBaseY, vehicleWidth, vehicleHeight);
         vehicle.setOrigin(Align.center);
         stage.addActor(vehicle);
     }
@@ -124,6 +134,9 @@ public class StaticVehicleScreen extends BaseScreen {
         currentScale = MIN_SCALE;
         targetScale = MIN_SCALE;
         vehicle.setScale(currentScale);
+        vehicle.setX(vehicleBaseX);
+        vehicle.setY(vehicleBaseY);
+        shakeTime = 0f;
         driftTimer = 0f;
         driftVolume = DRIFT_VOLUME_BASE;
         runTimer = 0f;
@@ -221,15 +234,33 @@ public class StaticVehicleScreen extends BaseScreen {
     }
 
     private void updateScale(float delta) {
-        if (currentScale == targetScale) {
+        boolean resizing = currentScale != targetScale;
+        if (resizing) {
+            if (currentScale < targetScale) {
+                currentScale = Math.min(targetScale, currentScale + SCALE_SPEED * delta);
+            } else {
+                currentScale = Math.max(targetScale, currentScale - SCALE_SPEED * delta);
+            }
+            vehicle.setScale(currentScale);
+        }
+        updateShake(delta, resizing);
+    }
+
+    private void updateShake(float delta, boolean resizing) {
+        if (!percussive) {
             return;
         }
-        if (currentScale < targetScale) {
-            currentScale = Math.min(targetScale, currentScale + SCALE_SPEED * delta);
-        } else {
-            currentScale = Math.max(targetScale, currentScale - SCALE_SPEED * delta);
+        vehicle.setX(vehicleBaseX);
+        vehicle.setY(vehicleBaseY);
+        if (resizing) {
+            shakeTime += delta;
+            float offset = MathUtils.sin(shakeTime * SHAKE_ANGULAR_SPEED) * SHAKE_AMPLITUDE;
+            if (vehicleType == VehicleType.BOAT) {
+                vehicle.setY(vehicleBaseY + offset);
+            } else {
+                vehicle.setX(vehicleBaseX + offset);
+            }
         }
-        vehicle.setScale(currentScale);
     }
 
     private void resumeGame() {
