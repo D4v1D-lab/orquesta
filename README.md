@@ -114,7 +114,7 @@ Recursos que la plantilla carga actualmente:
 - **Bote:** `tambor/drum.png`, `tambor/mosaico_mar.jpg`, `tambor/bote_start.mp3`, `tambor/bote_drift.mp3`, `tambor/bote_ending_sheet.png`, `tambor/bote_drive.mp3`.
 - **Tren:** `maracas/maraca.png`, `maracas/mosaico_tren.jpg`, `maracas/tren_start.mp3`, `maracas/tren_drift.mp3`, `maracas/tren_ending_sheet.png`, `maracas/tren_drive.mp3`.
 
-Los cuatro finales usan hojas pre-generadas de 150 fotogramas en rejilla 10×15 (480×270, 1/15 s). La única GIF fuente que queda es `guitarras/carro_ending.gif`. Los sprites antiguos (`carro.png`, `avion.png`, `bote.png`, `tren.png`) siguen en las carpetas nuevas pero no se cargan. Los recursos de gameplay que no se usan (obstáculos, bocinas y algunos sonidos de motor) permanecen en disco pero **no se cargan**. Si los usas al implementar el juego, añade sus `manager.load(...)` en `OrquestaGame.create()`.
+Los cuatro finales usan hojas pre-generadas de 150 fotogramas en rejilla 10×15 (480×270, 1/15 s). Los sprites antiguos, obstáculos, bocinas, GIFs fuente y sonidos no usados fueron eliminados. Si añades recursos nuevos, cárgalos con `manager.load(...)` en `OrquestaGame.create()`.
 
 Los informes de Métricas se generan desde `assets/artifacts/orquesta_metricas.html` y `orquesta_guia.html` hacia `orquesta_metricas.html` y `orquesta_guia.html` en el directorio de ejecución.
 
@@ -138,7 +138,6 @@ Orquesta mantiene las métricas mediante `Preferences` (clave `Orquesta_Metricas
 - Ventana en pantalla completa con `StretchViewport(1376×768)`.
 - Código compatible con Java 7 (`sourceCompatibility = 1.7`): sin lambdas ni características modernas.
 - Solo existen los módulos `:core` y `:desktop`; no hay objetivos Android ni de otras plataformas.
-- Box2D está incluido como dependencia, pero actualmente no se usa.
 - No hay tests, lint ni CI. La verificación es compilar y abrir el juego.
 - En JDK 11 es normal ver una advertencia de *illegal reflective access* de LWJGL 2; no impide jugar.
 

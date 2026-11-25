@@ -60,15 +60,13 @@ All four backdrops are 1376×768 images drawn once at full screen. The template 
   - `pianos/`: `piano.png`, `mosaico_cielo.jpg`, `avion_start.mp3`, `avion_drift.mp3`, `avion_ending_sheet.png`, `avion_drive.mp3`.
   - `tambor/`: `drum.png`, `mosaico_mar.jpg`, `bote_start.mp3`, `bote_drift.mp3`, `bote_ending_sheet.png`, `bote_drive.mp3`.
   - `maracas/`: `maraca.png`, `mosaico_tren.jpg`, `tren_start.mp3`, `tren_drift.mp3`, `tren_ending_sheet.png`, `tren_drive.mp3`.
-- **Present on disk but NOT loaded** (stale object sprites and unused gameplay leftovers; safe to replace or delete once you no longer need them): `guitarras/carro.png`, `guitarras/car_horn.mp3`, `guitarras/cono.png`, `guitarras/carro_ending.gif`; `pianos/avion.png`, `pianos/cono_cielo.png`; `tambor/bote.png`, `tambor/cono_mar.png`, `tambor/bote_horn.mp3`; `maracas/tren.png`, `maracas/cono_tierra.png`, `maracas/tren_horn.mp3`.
-- libGDX cannot load GIFs. The gift transition uses the pre-generated `common/load_gift_sheet.png` (75 frames, 8×10 grid, 480×270, 1/15 s). Mode ending sheets are pre-generated 150-frame 10×15 grids of 480×270 at 1/15 s (~10 s); the only remaining source GIF is `guitarras/carro_ending.gif`.
-- Cropped sprite regions: car `guitarras/guitarra.png` = `(119,119,262,262)`; cone `guitarras/cono.png` = `(192,169,116,162)`; plane `pianos/piano.png` = `(104,144,292,257)`; sky obstacle `pianos/cono_cielo.png` = `(159,194,182,112)`; boat `tambor/drum.png` = `(114,119,272,267)`; sea obstacle `tambor/cono_mar.png` = `(199,144,102,212)`; train `maracas/maraca.png` = `(139,154,222,192)`; ground obstacle `maracas/cono_tierra.png` = `(145,89,206,262)` including smoke.
+- libGDX cannot load GIFs. The gift transition uses the pre-generated `common/load_gift_sheet.png` (75 frames, 8×10 grid, 480×270, 1/15 s). Mode ending sheets are pre-generated 150-frame 10×15 grids of 480×270 at 1/15 s (~10 s); no source GIFs are kept.
+- Cropped instrument regions: car `guitarras/guitarra.png` = `(119,119,262,262)`; plane `pianos/piano.png` = `(104,144,292,257)`; boat `tambor/drum.png` = `(114,119,272,267)`; train `maracas/maraca.png` = `(139,154,222,192)`.
 - All four mosaics (`guitarras/mosaico_cesped.jpg`, `pianos/mosaico_cielo.jpg`, `tambor/mosaico_mar.jpg`, `maracas/mosaico_tren.jpg`) are 1376×768 and are drawn full-screen.
 - `common/resumir.png` and `common/menu.png` are the pause buttons, cropped `(39,155,422,190)` and `(79,155,342,191)` and rendered at `360×160` by `PauseMenu`.
 - `common/acerca.jpg`, `common/metricas.jpg`, and `common/reinicio.jpg` are the Options buttons, standardized to `360×160` by `OptionsScreen`. `assets/artifacts/acerca.html` is the styled about/dedication page opened by Acerca. Metrics reports are generated from `assets/artifacts/orquesta_metricas.html` and `orquesta_guia.html` into `Gdx.files.local("orquesta_metricas.html")` and `orquesta_guia.html`.
 - `GestorMetricas` persists metrics in `Orquesta_Metricas_Save`; `MetricasInputListener` measures ENTER hold time only while a run is active. Completed 30 s runs commit total games, gameplay ENTER presses, duration, and buffered hold samples; early exits are ignored. The report and guide are generated from `assets/artifacts/orquesta_metricas.html` and `orquesta_guia.html` into `Gdx.files.local("orquesta_metricas.html")` and `orquesta_guia.html`.
 - Audio currently used: `common/journey_awaits.mp3` (main menu, `0.5`), `common/racing_menu.ogg` (vehicle select and Options, `0.50`), `common/option_change.wav` (`0.75`), the four vehicle start sounds in `GiftScreen`, the four vehicle drift sounds in `StaticVehicleScreen` (dynamic volume starting at `0.75`, ±`0.25` per scale step, clamped `0-1`, cut off after `1.5 s`), and the ending sounds in `EndingScreen` at `0.5` (`car_drive.mp3`, `avion_drive.mp3`, `bote_drive.mp3`, and `tren_drive.mp3` once). Volumes are tuned manually by the user; do not “fix” them without being asked.
-- Box2D is a dependency but currently unused in code.
 
 ## How to add new gameplay
 
@@ -83,7 +81,7 @@ All four backdrops are 1376×768 images drawn once at full screen. The template 
 
 - The template compiles and the full menu → vehicle select → gift → frozen scene → pause flow is wired.
 - Gameplay is intentionally absent. The four original mode screens (`GameScreen`, `AirplaneScreen`, `BoatScreen`, `TrainScreen`) were deleted.
-- Assets for the old gameplay remain on disk but are not loaded; they are free to be replaced.
+- Unused legacy assets and the Box2D dependency were removed; the remaining assets are the runtime set loaded by `OrquestaGame`.
 - The road art and lane helpers were removed; instruments are centered on both axes over the full-screen backdrop.
 - `Enter` plays 1.5 s of the mode drift sound and animates the instrument through `1.00x → 1.67x → 2.33x → 3.00x`, then back down after three more presses; drift volume rises/falls `0.25` with the scale direction; there is no lane movement.
 - Each run lasts 30 s, then the mode ending plays for 10 s over black (piano full-screen with `avion_drive`) before returning to vehicle selection.
