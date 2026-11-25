@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -43,6 +44,7 @@ public class OptionsScreen extends BaseScreen {
     private final Image[] buttons;
     private final BitmapFont font;
     private final Label statusLabel;
+    private final Vector2 touchPoint = new Vector2();
     private int selectedIndex;
     private boolean resetPending;
     private boolean readyShowing;
@@ -99,6 +101,32 @@ public class OptionsScreen extends BaseScreen {
         }
     }
 
+    private boolean handleTouch() {
+        if (!Gdx.input.justTouched()) {
+            return false;
+        }
+        touchPoint.set(Gdx.input.getX(), Gdx.input.getY());
+        stage.screenToStageCoordinates(touchPoint);
+        for (int i = 0; i < BUTTON_COUNT; i++) {
+            Image button = buttons[i];
+            boolean inside = touchPoint.x >= button.getX()
+                    && touchPoint.x <= button.getX() + button.getWidth()
+                    && touchPoint.y >= button.getY()
+                    && touchPoint.y <= button.getY() + button.getHeight();
+            if (inside) {
+                if (selectedIndex != i) {
+                    selectedIndex = i;
+                    cancelPending();
+                    optionChange.play(0.75f);
+                    updateSelection();
+                }
+                activateSelection();
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void moveSelection(int direction) {
         selectedIndex = (selectedIndex + direction + BUTTON_COUNT) % BUTTON_COUNT;
         optionChange.play(0.75f);
@@ -150,7 +178,28 @@ public class OptionsScreen extends BaseScreen {
 
     private void openHtml(String path) {
         File file = Gdx.files.internal(path).file().getAbsoluteFile();
-        Gdx.net.openURI(file.toURI().toString());
+        if (!file.exists()) {
+            Gdx.app.error("OptionsScreen", "No existe el archivo " + file.getAbsolutePath());
+            return;
+        }
+        String uri = file.toURI().toString();
+        try {
+            Gdx.net.openURI(uri);
+        } catch (RuntimeException e) {
+            Gdx.app.error("OptionsScreen", "No se pudo abrir " + uri, e);
+            try {
+                Runtime.getRuntime().exec(new String[] {
+                        "rundll32", "url.dll,FileProtocolHandler", file.getAbsolutePath()
+                });
+            } catch (Exception fallbackError) {
+                Gdx.app.error("OptionsScreen", "Fallo el metodo alternativo", fallbackError);
+            }
+        }
+        try {
+            Thread.sleep(250L);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     @Override
@@ -186,6 +235,10 @@ public class OptionsScreen extends BaseScreen {
                     statusLabel.setVisible(false);
                 }
             }
+        }
+
+        if (handleTouch()) {
+            return;
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
